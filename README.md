@@ -31,3 +31,17 @@ openssl req -x509 -newkey rsa:4096 -keyout ./keys/test-key.pem -out ./keys/test-
 ```bash
     npm run start-http2
 ```
+
+## To query http 2 server with curl
+
+```bash
+curl --location --request GET 'https://localhost:54321' --http2 --insecure
+```
+
+## If Postman is used to tinker with the servers
+
+Postman currently doesn't support http2, use curl:
+
+- create a request in postman
+- click "</>" to see the curl command
+- add --http2 --insecure to the end of it and execute via terminal
