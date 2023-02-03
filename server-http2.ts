@@ -9,6 +9,7 @@ const options = {
 const server = http2.createSecureServer(options);
 
 server.on('stream', (stream, headers) => {
+  console.log(headers);
   // stream is a Duplex
   stream.respond({
     'content-type': 'text/html; charset=utf-8',
