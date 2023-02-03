@@ -1,0 +1,15 @@
+{
+  "name": "nodejs-https-servers",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start-http1": "npx tsc && node ./build/server.js",
+    "start-http2": "npx tsc && node ./build/server-http2.js"
+  },
+  "author": "Evgeny Lyozin (evgenylyozindev@gmail.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "typescript": "^5.0.0-beta"
+  }
+}
