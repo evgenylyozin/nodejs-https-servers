@@ -1,7 +1,6 @@
 import https from 'https';
 import fs from 'fs';
 import { IncomingMessage } from 'http';
-import { resolve } from 'path';
 
 const options = {
   key: fs.readFileSync('./keys/test-key.pem'),
@@ -52,6 +51,7 @@ type DataObject = {
   files: FileObject[];
   [key: string]: string | FileObject[];
 };
+
 type FileObject = { filename?: string; contentType?: string; data: string };
 
 const parseMultipartFormData = (data: string[]) => {
@@ -98,70 +98,82 @@ const server = https.createServer(options, async (req, res) => {
   // logging some useful request info
   console.log(req.url, req.method, req.headers);
 
-  // working with multipart/form-data including files
-  if (req.headers['content-type']?.includes('multipart/form-data')) {
-    req.setEncoding('latin1');
-    const rawData = await createBufferFromRequestBody(req);
-    let boundary = getBoundary(req.headers['content-type']);
-    const rawDataArr = rawData.split(boundary);
-    const parsedData = parseMultipartFormData(rawDataArr);
+  if (req.method === 'POST') {
+    // working with multipart/form-data including files
+    if (req.headers['content-type']?.includes('multipart/form-data')) {
+      req.setEncoding('latin1');
+      const rawData = await createBufferFromRequestBody(req);
+      let boundary = getBoundary(req.headers['content-type']);
+      const rawDataArr = rawData.split(boundary);
+      const parsedData = parseMultipartFormData(rawDataArr);
 
-    // logging parsed multipart/form-datave
-    console.log(parsedData);
+      // logging parsed multipart/form-datave
+      console.log(parsedData);
 
-    // potentially save files on the server
-    // for (let i = 0; i < parsedData.files.length; i++) {
-    //   const file = parsedData.files[i];
-    //   const stream = fs.createWriteStream(
-    //     `./${file.filename}` || `./${i}.file`
-    //   );
-    //   stream.write(file.data, 'binary');
-    //   stream.close();
-    // }
+      // potentially save files on the server
+      // for (let i = 0; i < parsedData.files.length; i++) {
+      //   const file = parsedData.files[i];
+      //   const stream = fs.createWriteStream(
+      //     `./${file.filename}` || `./${i}.file`
+      //   );
+      //   stream.write(file.data, 'binary');
+      //   stream.close();
+      // }
 
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ data: 'multipart/form-data received' }));
+      return;
+    }
+
+    // working with application/x-www-form-urlencoded data in the request
+    if (
+      req.headers['content-type']?.includes('application/x-www-form-urlencoded')
+    ) {
+      const rawData = await createBufferFromRequestBody(req);
+      const parsedData = parseFormURLEncodedData(rawData);
+      console.log(parsedData);
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ data: 'application/x-www-form-urlencoded' }));
+      return;
+    }
+
+    // working with binary data
+    const SomeMimeTypes = ['image/jpeg', 'application/pdf', 'application/zip'];
+    if (
+      req.headers['content-type'] &&
+      SomeMimeTypes.includes(req.headers['content-type'])
+    ) {
+      req.setEncoding('latin1');
+      const type = req.headers['content-type'].split('/')[1];
+      await saveFileToTheServer(req, type);
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ data: 'binary data received' }));
+      return;
+    }
+
+    // working with other raw data (text, json, js, html, xml)
+
+    const rawData = createBufferFromRequestBody(req);
+    console.log((await rawData).toString());
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ data: 'multipart/form-data received' }));
+    res.end(
+      JSON.stringify({
+        data: 'other raw data like text, json, js, html or xml received',
+      })
+    );
     return;
   }
 
-  // working with application/x-www-form-urlencoded data in the request
-  if (
-    req.headers['content-type']?.includes('application/x-www-form-urlencoded')
-  ) {
-    const rawData = await createBufferFromRequestBody(req);
-    const parsedData = parseFormURLEncodedData(rawData);
-    console.log(parsedData);
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ data: 'application/x-www-form-urlencoded' }));
+  if (req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end('<h1>Hello!</h1>');
     return;
   }
 
-  // working with binary data
-  const SomeMimeTypes = ['image/jpeg', 'application/pdf', 'application/zip'];
-  if (
-    req.headers['content-type'] &&
-    SomeMimeTypes.includes(req.headers['content-type'])
-  ) {
-    req.setEncoding('latin1');
-    const type = req.headers['content-type'].split('/')[1];
-    await saveFileToTheServer(req, type);
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ data: 'binary data received' }));
-    return;
-  }
-
-  // working with other raw data (text, json, js, html, xml)
-
-  const rawData = createBufferFromRequestBody(req);
-  console.log((await rawData).toString());
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(
-    JSON.stringify({
-      data: 'other raw data like text, json, js, html or xml received',
-    })
-  );
+  res.writeHead(405, { 'Content-Type': 'text/html' });
+  res.end(`<h1>Server doesn\'t support method ${req.method}</h1>`);
   return;
 });
 
