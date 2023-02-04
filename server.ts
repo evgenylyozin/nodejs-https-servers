@@ -167,6 +167,18 @@ const server = https.createServer(options, async (req, res) => {
   }
 
   if (req.method === 'GET') {
+    if (req.url === '/secured') {
+      const token = req.headers['token'];
+      if (token && token === 'valid') {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end('<h1>Secured page</h1>');
+        return;
+      } else {
+        res.writeHead(401, { 'Content-Type': 'text/html' });
+        res.end('<h1>You are unauthorized to see the secured content</h1>');
+        return;
+      }
+    }
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end('<h1>Hello!</h1>');
     return;
