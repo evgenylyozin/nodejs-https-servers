@@ -1,98 +1,14 @@
 import https from 'https';
 import fs from 'fs';
-import { IncomingMessage } from 'http';
 import path from 'path';
-const options = {
-  key: fs.readFileSync('./keys/test-key.pem'),
-  cert: fs.readFileSync('./keys/test-cert.pem'),
-};
-
-const createBufferFromRequestBody = (request: IncomingMessage) => {
-  return new Promise<string>((resolve) => {
-    let data = '';
-    request.on('data', (chunk) => {
-      data += chunk;
-    });
-    request.on('end', () => {
-      resolve(data);
-    });
-  });
-};
-
-const saveFileToTheServer = (request: IncomingMessage, type: string) => {
-  return new Promise<boolean>((resolve) => {
-    let data = '';
-    request.on('data', (chunk) => {
-      data += chunk;
-    });
-    request.on('end', () => {
-      const stream = fs.createWriteStream(`./SavedBinaryFile.${type}`);
-      stream.write(data, 'binary');
-      stream.close();
-      resolve(true);
-    });
-  });
-};
-
-const getBoundary = (contentType: string) => {
-  const parts = contentType.split('boundary=');
-  return parts[parts.length - 1];
-};
-
-const getMatching = (item: string, regex: RegExp) => {
-  const match = item.match(regex);
-  if (match) {
-    return match[1];
-  }
-  return null;
-};
-
-type DataObject = {
-  files: FileObject[];
-  [key: string]: string | FileObject[];
-};
-
-type FileObject = { filename?: string; contentType?: string; data: string };
-
-const parseMultipartFormData = (data: string[]) => {
-  let dataObj: DataObject = { files: [] };
-
-  for (let item of data) {
-    const name = getMatching(item, /(?:name=")(.+?)(?:")/);
-    if (!name) continue;
-    const value = getMatching(item, /(?:\r\n\r\n)([\S\s]*)(?:\r\n--$)/);
-    if (!value) continue;
-    // possible files
-    let filename = getMatching(item, /(?:filename=")(.*?)(?:")/);
-    let contentType = getMatching(item, /(?:Content-Type:)(.*?)(?:\r\n)/);
-    let fileObj: FileObject = { filename: '', contentType: '', data: '' };
-    if (filename) {
-      fileObj.filename = filename;
-    }
-    if (contentType) {
-      fileObj.contentType = contentType;
-    }
-    if (filename || contentType) {
-      fileObj.data = value;
-      dataObj.files.push(fileObj);
-      continue;
-    }
-
-    dataObj[name] = value;
-  }
-
-  return dataObj;
-};
-
-const parseFormURLEncodedData = (data: string) => {
-  const dataObj: DataObject = { files: [] };
-  const keyValuePairs = data.split('&');
-  for (let pair of keyValuePairs) {
-    const [key, value] = pair.split('=');
-    dataObj[key] = value;
-  }
-  return dataObj;
-};
+import {
+  createBufferFromRequestBody,
+  getBoundary,
+  parseMultipartFormData,
+  parseFormURLEncodedData,
+  saveFileToTheServer,
+} from './helpers';
+import { options } from './options';
 
 const server = https.createServer(options, async (req, res) => {
   // logging some useful request info
@@ -119,8 +35,7 @@ const server = https.createServer(options, async (req, res) => {
       //   stream.write(file.data, 'binary');
       //   stream.close();
       // }
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ data: 'multipart/form-data received' }));
       return;
     }
@@ -133,7 +48,7 @@ const server = https.createServer(options, async (req, res) => {
       const parsedData = parseFormURLEncodedData(rawData);
       console.log(parsedData);
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ data: 'application/x-www-form-urlencoded' }));
       return;
     }
@@ -148,7 +63,7 @@ const server = https.createServer(options, async (req, res) => {
       const type = req.headers['content-type'].split('/')[1];
       await saveFileToTheServer(req, type);
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ data: 'binary data received' }));
       return;
     }
@@ -157,7 +72,7 @@ const server = https.createServer(options, async (req, res) => {
 
     const rawData = createBufferFromRequestBody(req);
     console.log((await rawData).toString());
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.writeHead(200, { 'content-type': 'application/json' });
     res.end(
       JSON.stringify({
         data: 'other raw data like text, json, js, html or xml received',
@@ -170,11 +85,11 @@ const server = https.createServer(options, async (req, res) => {
     if (req.url === '/secured') {
       const token = req.headers['token'];
       if (token && token === 'valid') {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.writeHead(200, { 'content-type': 'text/html' });
         res.end('<h1>Secured page</h1>');
         return;
       } else {
-        res.writeHead(401, { 'Content-Type': 'text/html' });
+        res.writeHead(401, { 'content-type': 'text/html' });
         res.end('<h1>You are unauthorized to see the secured content</h1>');
         return;
       }
@@ -184,18 +99,18 @@ const server = https.createServer(options, async (req, res) => {
       const stat = fs.statSync(filePath);
 
       res.writeHead(200, {
-        'Content-Type': 'text/markdown',
+        'content-type': 'text/markdown',
         'Content-Length': stat.size,
       });
 
       return fs.createReadStream(filePath).pipe(res);
     }
-    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.writeHead(200, { 'content-type': 'text/html' });
     res.end('<h1>Hello!</h1>');
     return;
   }
 
-  res.writeHead(405, { 'Content-Type': 'text/html' });
+  res.writeHead(405, { 'content-type': 'text/html' });
   res.end(`<h1>Server doesn\'t support method ${req.method}</h1>`);
   return;
 });

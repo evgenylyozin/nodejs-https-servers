@@ -48,6 +48,31 @@
 			"response": []
 		},
 		{
+			"name": "Get \"/secured\" from http 2 server with a valid token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "valid",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://localhost:54321/secured",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "54321",
+					"path": [
+						"secured"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get \"/secured\" from http 1.1 server with an ivalid token",
 			"request": {
 				"method": "GET",
@@ -65,6 +90,31 @@
 						"localhost"
 					],
 					"port": "12345",
+					"path": [
+						"secured"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get \"/secured\" from http 2 server with an ivalid token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "invalid",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://localhost:54321/secured",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "54321",
 					"path": [
 						"secured"
 					]
@@ -92,7 +142,26 @@
 			"response": []
 		},
 		{
-			"name": "Get \"/\" from http 2.0 server (see curl snippet)",
+			"name": "Get \"/getfile\" from http 2 server to download a file",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:54321/getfile",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "54321",
+					"path": [
+						"getfile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get \"/\" from http 2 server",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -128,7 +197,7 @@
 						{
 							"key": "file",
 							"type": "file",
-							"src": "~/Downloads/5.jpg"
+							"src": "/home/evgeny/Downloads/5.jpg"
 						}
 					]
 				},
@@ -139,6 +208,49 @@
 						"localhost"
 					],
 					"port": "12345",
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST \"/\" http 2 server form-data (text payload + file)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "key",
+							"value": "value",
+							"type": "text"
+						},
+						{
+							"key": "key2",
+							"value": "value2",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/home/evgeny/Downloads/5.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://localhost:54321",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "54321",
 					"query": [
 						{
 							"key": "",
@@ -182,6 +294,37 @@
 			"response": []
 		},
 		{
+			"name": "POST \"/\" http 2 server x-www-form-urlencoded (text payload)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "key1",
+							"value": "value1",
+							"type": "text"
+						},
+						{
+							"key": "key2",
+							"value": "value2",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://localhost:54321",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "54321"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "POST \"/\" http 1.1 server binary payload",
 			"request": {
 				"method": "POST",
@@ -189,7 +332,7 @@
 				"body": {
 					"mode": "file",
 					"file": {
-						"src": "~/Downloads/5.jpg"
+						"src": "/home/evgeny/Downloads/5.jpg"
 					}
 				},
 				"url": {
@@ -199,6 +342,28 @@
 						"localhost"
 					],
 					"port": "12345"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST \"/\" http 2 server binary payload",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/home/evgeny/Downloads/5.jpg"
+					}
+				},
+				"url": {
+					"raw": "https://localhost:54321",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "54321"
 				}
 			},
 			"response": []
@@ -229,6 +394,31 @@
 			"response": []
 		},
 		{
+			"name": "POST \"/\" http 2 server raw data payload",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\"hello!\"",
+					"options": {
+						"raw": {
+							"language": "javascript"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:54321",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "54321"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "unsupported method test",
 			"request": {
 				"method": "PUT",
@@ -240,6 +430,22 @@
 						"localhost"
 					],
 					"port": "12345"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "unsupported method test for http2 server",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:54321",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "54321"
 				}
 			},
 			"response": []
