@@ -1,7 +1,7 @@
 import https from 'https';
 import fs from 'fs';
 import { IncomingMessage } from 'http';
-
+import path from 'path';
 const options = {
   key: fs.readFileSync('./keys/test-key.pem'),
   cert: fs.readFileSync('./keys/test-cert.pem'),
@@ -178,6 +178,17 @@ const server = https.createServer(options, async (req, res) => {
         res.end('<h1>You are unauthorized to see the secured content</h1>');
         return;
       }
+    }
+    if (req.url === '/getfile') {
+      const filePath = path.join(__dirname, '../', 'README.md');
+      const stat = fs.statSync(filePath);
+
+      res.writeHead(200, {
+        'Content-Type': 'text/markdown',
+        'Content-Length': stat.size,
+      });
+
+      return fs.createReadStream(filePath).pipe(res);
     }
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end('<h1>Hello!</h1>');
