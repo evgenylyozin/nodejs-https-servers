@@ -23,6 +23,75 @@
 			"response": []
 		},
 		{
+			"name": "Get \"/secured\" from http 1.1 server with a valid token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "valid",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://localhost:12345/secured",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "12345",
+					"path": [
+						"secured"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get \"/secured\" from http 1.1 server with an ivalid token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "invalid",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://localhost:12345/secured",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "12345",
+					"path": [
+						"secured"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get \"/getfile\" from http 1.1 server to download a file",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:12345/getfile",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "12345",
+					"path": [
+						"getfile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get \"/\" from http 2.0 server (see curl snippet)",
 			"request": {
 				"method": "GET",
